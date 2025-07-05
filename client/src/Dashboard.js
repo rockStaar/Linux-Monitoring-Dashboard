@@ -1,24 +1,19 @@
-import CpuApp from "./CpuApp";
-import MemApp from "./App";
+import useSystemStats from "./hooks/useSystemStats";
 
 function Dashboard() {
+  const { cpu, memory } = useSystemStats();
+
   return (
-    <div
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        justifyContent: "center",
-        gap: "2rem",
-        padding: "2rem",
-        fontFamily: "monospace"
-      }}
-    >
-      <div style={{ flex: "1 1 45%", minWidth: "320px" }}>
-        <CpuApp />
-      </div>
-      <div style={{ flex: "1 1 45%", minWidth: "320px" }}>
-        <MemApp />
-      </div>
+    <div style={{ fontFamily: "monospace", padding: "2rem" }}>
+      <h1>📊 HyprDash</h1>
+
+      <p>🧠 CPU: {cpu ?? "Waiting..."}</p>
+
+      <p>💾 RAM Used: {memory?.percentUsed ?? "Waiting..."}%</p>
+      <p>🟩 Total: {memory?.total ?? "—"} kB</p>
+      <p>🟦 Free: {memory?.free ?? "—"} kB</p>
+      <p>🟨 Available: {memory?.available ?? "—"} kB</p>
+      <p>🧊 Cached: {memory?.cached ?? "—"} kB</p>
     </div>
   );
 }

@@ -25,6 +25,8 @@ io.on("connection", (socket) => {
 
 setInterval(() => {
   const memory = getMemoryStats();
+  console.log("💾 Memory Stats:", memory);
+
   const cpu = getCPUUsage();
 
   socket.emit("stats", { cpu, memory, timestamp: new Date() });

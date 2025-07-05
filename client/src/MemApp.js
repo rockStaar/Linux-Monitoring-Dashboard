@@ -12,36 +12,46 @@ import { Line } from "react-chartjs-2";
 // Register Chart.js components
 ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale);
 
-function App() {
+function MemApp() {
   const [memory, setMemory] = useState({});
   const [usedPercent, setUsedPercent] = useState(null);
   const [history, setHistory] = useState([]);
 
   useEffect(() => {
-    const socket = io("http://192.168.0.236:4000");
+    const socket = io("http://localhost:4000");
 
     socket.on("connect", () => console.log("✅ Connected to backend"));
 
     socket.on("stats", (data) => {
-      setMemory(data.memory);
+      const mem = data?.memory;
 
-      const percent =
-        ((data.memory.total - data.memory.available) / data.memory.total) * 100;
-      setUsedPercent(percent.toFixed(1));
+      if (
+        mem &&
+        typeof mem.total === "number" &&
+        typeof mem.available === "number" &&
+        mem.total > 0
+      ) {
+        setMemory(mem);
 
-      setHistory((prev) => [
-        ...prev.slice(-59),
-        {
-          free: data.memory.free,
-          available: data.memory.available,
-          cached: data.memory.cached,
-          time: new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit"
-          })
-        }
-      ]);
+        const percent = ((mem.total - mem.available) / mem.total) * 100;
+        setUsedPercent(percent.toFixed(1));
+
+        setHistory((prev) => [
+          ...prev.slice(-59),
+          {
+            free: mem.free ?? 0,
+            available: mem.available ?? 0,
+            cached: mem.cached ?? 0,
+            time: new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit"
+            })
+          }
+        ]);
+      } else {
+        console.warn("⚠️ Invalid memory data received:", mem);
+      }
     });
 
     return () => socket.disconnect();
@@ -122,10 +132,10 @@ function App() {
         </p>
       )}
 
-      <p>🟩 Total: {memory?.total ?? "—"} kB</p>
-      <p>🟦 Free: {memory?.free ?? "—"} kB</p>
-      <p>🟨 Available: {memory?.available ?? "—"} kB</p>
-      <p>🧊 Cached: {memory?.cached ?? "—"} kB</p>
+      <p>🟩 Total: {memory.total ?? "—"} kB</p>
+      <p>🟦 Free: {memory.free ?? "—"} kB</p>
+      <p>🟨 Available: {memory.available ?? "—"} kB</p>
+      <p>🧊 Cached: {memory.cached ?? "—"} kB</p>
 
       {history.length > 0 ? (
         <div style={{ width: "100%", height: "240px" }}>
@@ -138,4 +148,4 @@ function App() {
   );
 }
 
-export default App;
+export default MemApp;
